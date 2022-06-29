@@ -1,5 +1,5 @@
 '''
-threaded approach
+processed approach
 '''
 
 import time
@@ -50,7 +50,7 @@ def main():
     # Wait for all the tasks in the queue to be processed
     QUEUE.join()
     end_time = time.time()
-    print('Time for Threaded:', end_time - start_time, 'secs')
+    print('Time for Processed:', end_time - start_time, 'secs')
 
 
 if __name__ == "__main__":
