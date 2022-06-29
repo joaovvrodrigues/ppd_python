@@ -4,8 +4,8 @@ import numpy as np
 def extrair(row):
     row_data = []
     
-    img_coffee = crop_image(cv2.imread('./RAW/{}'.format(row['name_coffee'])), row['X1'], row['Y1'], row['H'])
-    img_paper = crop_image(cv2.imread('./RAW/{}'.format(row['name_paper'])), row['X1'], row['Y1'], row['H'])
+    img_coffee = crop_image(cv2.imread('./dev/RAW/{}'.format(row['name_coffee'])), row['X1'], row['Y1'], row['H'])
+    img_paper = crop_image(cv2.imread('./dev/RAW/{}'.format(row['name_paper'])), row['X1'], row['Y1'], row['H'])
     
     agtron_value = row['agtron']
     flash_value = row['flash']
@@ -56,9 +56,9 @@ def extrair_m(row):
 
 def montar(row):
     img_coffee = crop_image(cv2.imread(
-        './RAW/{}'.format(row['name_coffee'])), row['X1'], row['Y1'], row['H'])
+        './dev/RAW/{}'.format(row['name_coffee'])), row['X1'], row['Y1'], row['H'])
     img_paper = crop_image(cv2.imread(
-        './RAW/{}'.format(row['name_paper'])), row['X1'], row['Y1'], row['H'])
+        './dev/RAW/{}'.format(row['name_paper'])), row['X1'], row['Y1'], row['H'])
 
     agtron_value = row['agtron']
     flash_value = row['flash']
