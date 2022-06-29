@@ -1,5 +1,5 @@
 '''
-Sequential approach
+Threaded approach
 Time for Threaded: 5.90933632850647 secs
 24 imagens
 '''
@@ -11,11 +11,12 @@ import db
 import pandas as pd
 import time
 
-NUM_WORKERS = 4
+
+TOTAL_THREADS = 4
 QUEUE_IMAGES = Queue()
 DATA = []
 
-def worker():
+def function():
     while True:
         image = QUEUE_IMAGES.get()
         DATA.append(db.extrair(image))
@@ -26,7 +27,7 @@ def worker():
 
 def main():
     start_time = time.time()
-    threads = [Thread(target=worker) for _ in range(NUM_WORKERS)]
+    threads = [Thread(target=function) for _ in range(TOTAL_THREADS)]
 
     dataframe = pd.read_csv('./photos.csv', delimiter=';')
 
