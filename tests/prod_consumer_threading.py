@@ -82,6 +82,7 @@ class Producer(threading.Thread):
 
 
 def main():
+    start_time = time.time()
     producer = Producer(name='Producer')
     consumer = Consumer(name='Consumer')
 
@@ -93,6 +94,9 @@ def main():
     consumer.start()
     producer.join()
     consumer.join()
+
+    end_time = time.time()
+    print('Time for Processed:', end_time - start_time, 'secs')
 
     print(len(lista_dados))
 
