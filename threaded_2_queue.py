@@ -1,67 +1,56 @@
 '''
 threaded approach
+Time for Threaded 2 Queue: 8.606582641601562 secs
+24 imagens
 '''
 
 import time
 from queue import Queue
 from threading import Thread
 import db
-import cv2
-import numpy as np
 import pandas as pd
-import csv
-import datetime
 import time
 
-# Time for Threaded: 114.82532739639282 secs
-NUM_WORKERS = 4
+TOTAL_THREADS = 4
 QUEUE_LINKS = Queue()
 QUEUE_IMAGENS = Queue()
 DATA = []
+PRODUZIDO = False
 
 
 def montador():
-    '''
-    Thread function
-    '''
-    # Constantly check the queue for addresses
     while True:
+        global PRODUZIDO
+
         image = QUEUE_LINKS.get()
-        # DATA.append(db.extrair(image))
         a = db.montar(image)
         QUEUE_IMAGENS.put(a)
-        # Mark the processed task as done
         QUEUE_LINKS.task_done()
-        # QUEUE_IMAGENS.task_done()
         if QUEUE_LINKS.empty():
             print('QUEUE_LINKS.empty()')
+            PRODUZIDO = True
             break
 
+
 def extrator():
-    '''
-    Thread function
-    '''
-    # Constantly check the queue for addresses
     while True:
+        global PRODUZIDO
+
         images = QUEUE_IMAGENS.get()
         DATA.append(db.extrair_m(images))
-        # Mark the processed task as done
         QUEUE_IMAGENS.task_done()
-        # if QUEUE_IMAGENS.empty():
-        #     print('QUEUE_IMAGENS.empty()')
-        #     break
-        
+        if QUEUE_IMAGENS.empty() and PRODUZIDO:
+            print('QUEUE_IMAGENS.empty()')
+            break
+
 
 def main():
-    '''
-    Main function
-    '''
     start_time = time.time()
-    # Create the worker threads
-    threads_montadoras = [Thread(target=montador) for _ in range(NUM_WORKERS)]
-    threads_extratoras = [Thread(target=extrator) for _ in range(NUM_WORKERS)]
+    threads_montadoras = [Thread(target=montador)
+                          for _ in range(TOTAL_THREADS//2)]
+    threads_extratoras = [Thread(target=extrator)
+                          for _ in range(TOTAL_THREADS//2)]
 
-    # Add the websites to the task queue
     dataframe = pd.read_csv('./photos.csv', delimiter=';')
 
     for index, row in dataframe.iterrows():
@@ -72,13 +61,17 @@ def main():
         threads_montadoras[index].start()
         threads_extratoras[index].start()
 
-    # Wait for all the tasks in the queue to be processed
+    # Usando sommente o join() da queue ele finaliza antes de terminar os threads
+    # for index in range(len(threads_montadoras)):
+    #     threads_montadoras[index].join()
+    #     threads_extratoras[index].join()
+
     QUEUE_LINKS.join()
     QUEUE_IMAGENS.join()
 
     end_time = time.time()
-    print('Time for Threaded:', end_time - start_time, 'secs')
-    print(len(DATA))
+    print('Time for Threaded 2 queue:', end_time - start_time, 'secs')
+    print('Foram extraidos ', len(DATA), ' dados mas deveriam ser ', dataframe.shape[0] )
 
 
 if __name__ == "__main__":

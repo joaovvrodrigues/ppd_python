@@ -85,7 +85,7 @@ def main():
     producer = Producer(name='Producer')
     consumer = Consumer(name='Consumer')
 
-    dataframe = pd.read_csv('./dev/photos.csv', delimiter=';')
+    dataframe = pd.read_csv('./photos.csv', delimiter=';')
     for index, row in dataframe.iterrows():
         items.append(row)
 
