@@ -9,7 +9,7 @@ COMO EXECUTAR: python processed.py -k 4 -i 4
 import argparse
 import time
 from multiprocessing import Process, JoinableQueue
-import db
+import coffee_analyzer
 import pandas as pd
 import time
 
@@ -17,7 +17,7 @@ import time
 def function(QUEUE_IMAGES, QUEUE_DATA):
     while True:
         image = QUEUE_IMAGES.get()
-        QUEUE_DATA.put(db.read_crop_analyze(image))
+        QUEUE_DATA.put(coffee_analyzer.read_crop_analyze(image))
         print(QUEUE_DATA.qsize())
         QUEUE_IMAGES.task_done()
         if QUEUE_IMAGES.empty():

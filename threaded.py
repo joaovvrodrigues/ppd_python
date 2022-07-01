@@ -9,14 +9,14 @@ import argparse
 import time
 from queue import Queue
 from threading import Thread
-import db
+import coffee_analyzer
 import pandas as pd
 import time
 
 def function(QUEUE_IMAGES, DATA):
     while True:
         image = QUEUE_IMAGES.get()
-        DATA.append(db.read_crop_analyze(image))
+        DATA.append(coffee_analyzer.read_crop_analyze(image))
         QUEUE_IMAGES.task_done()
         if QUEUE_IMAGES.empty():
             break

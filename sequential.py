@@ -6,7 +6,7 @@ COMO EXECUTAR: python sequential.py -i 4
 '''
 import argparse
 import time
-import db
+import coffee_analyzer
 import pandas as pd
 
 
@@ -25,7 +25,7 @@ def main():
         args.images = df.shape[0]
 
     for i in range(args.images):
-        itens.append(db.read_crop_analyze(df.iloc[i]))
+        itens.append(coffee_analyzer.read_crop_analyze(df.iloc[i]))
 
     END_TIME = time.time()
 
