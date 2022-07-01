@@ -1,9 +1,10 @@
 '''
 Sequential approach
-Time for sequential: 18.905866146087646 secs
-24 imagens
-'''
 
+COMO EXECUTAR: python sequential.py -i 4
+-i Indica o número de imagens a serem processadas
+'''
+import argparse
 import time
 import db
 import pandas as pd
@@ -11,17 +12,26 @@ import pandas as pd
 
 def main():
     itens = []
-    
-    start_time = time.time()
-    
-    dataframe = pd.read_csv('./photos.csv', delimiter=';')
-    for index, row in dataframe.iterrows():
-        itens.append(db.extrair(row))
-    
-    end_time = time.time()
 
-    print('Time for sequential:', end_time - start_time, 'secs')
+    parser = argparse.ArgumentParser('PROCESS')
+    parser.add_argument('-i', '--images', type=int, default=24)
+    args = parser.parse_args()
+
+    START_TIME = time.time()
+
+    df = pd.read_csv('./photos.csv', delimiter=';')
+
+    if(args.images > df.shape[0]):
+        args.images = df.shape[0]
+
+    for i in range(args.images):
+        itens.append(db.read_crop_analyze(df.iloc[i]))
+
+    END_TIME = time.time()
+
+    print('Time for sequential:', END_TIME - START_TIME, 'secs')
     print('Total itens:', len(itens))
+
 
 if __name__ == '__main__':
     main()

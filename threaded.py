@@ -1,9 +1,11 @@
 '''
 Threaded approach
-Time for Threaded: 5.90933632850647 secs
-24 imagens
-'''
 
+COMO EXECUTAR: python threaded.py -k 4 -i 4
+-k Indica o número de threads
+-i Indica o número de imagens a serem processadas
+'''
+import argparse
 import time
 from queue import Queue
 from threading import Thread
@@ -11,38 +13,45 @@ import db
 import pandas as pd
 import time
 
-
-TOTAL_THREADS = 4
-QUEUE_IMAGES = Queue()
-DATA = []
-
-def function():
+def function(QUEUE_IMAGES, DATA):
     while True:
         image = QUEUE_IMAGES.get()
-        DATA.append(db.extrair(image))
+        DATA.append(db.read_crop_analyze(image))
         QUEUE_IMAGES.task_done()
         if QUEUE_IMAGES.empty():
             break
 
 
 def main():
-    start_time = time.time()
-    threads = [Thread(target=function) for _ in range(TOTAL_THREADS)]
+    QUEUE_IMAGES = Queue()
+    DATA = []
+    
+    parser = argparse.ArgumentParser('THREADED')
+    parser.add_argument('-k', '--threads', type=int, default=4)
+    parser.add_argument('-i', '--images', type=int, default=24)
+    args = parser.parse_args()
 
-    dataframe = pd.read_csv('./photos.csv', delimiter=';')
+    TOTAL_THREADS = args.threads
 
-    for index, row in dataframe.iterrows():
-        QUEUE_IMAGES.put(row)
+    START_TIME = time.time()
+    threads = [Thread(target=function, args=[QUEUE_IMAGES, DATA]) for _ in range(TOTAL_THREADS)]
+
+    df = pd.read_csv('./photos.csv', delimiter=';')
+
+    if(args.images > df.shape[0]):
+        args.images = df.shape[0]
+
+    for i in range(args.images):
+        QUEUE_IMAGES.put(df.iloc[i])
 
     for thread in threads:
         thread.start()
 
     QUEUE_IMAGES.join()
-    end_time = time.time()
-    
-    print('Time for Threaded:', end_time - start_time, 'secs')
-    print(len(DATA))
+    END_TIME = time.time()
 
+    print('Time for Threaded:', END_TIME - START_TIME, 'secs')
+    print(len(DATA))
 
 if __name__ == "__main__":
     main()
