@@ -13,17 +13,22 @@ import pandas as pd
 def main():
     itens = []
 
+    # Parseando os argumentos da linha de comando
     parser = argparse.ArgumentParser('PROCESS')
     parser.add_argument('-i', '--images', type=int, default=24)
     args = parser.parse_args()
-
+    
+    # Iniciando o processamento
     START_TIME = time.time()
-
+    
+    # Carregando as imagens
     df = pd.read_csv('./photos.csv', delimiter=';')
-
+    
+    # Verificando se quantidade de imagens informadas é maior que a quantidade disponível
     if(args.images > df.shape[0]):
         args.images = df.shape[0]
 
+    # Processando as imagens
     for i in range(args.images):
         itens.append(coffee_analyzer.read_crop_analyze(df.iloc[i]))
 
