@@ -1,6 +1,9 @@
-import celery
-import cv2
+from PIL import Image
 import numpy as np
+import io
+import cv2
+import celery
+import base64
 
 # SUBIR O SERVIDOR RABBIT sudo rabbitmq-server
 # VERIFICA SE O SERVIDOR ESTA RODANDO sudo rabbitmqctl status
@@ -10,24 +13,26 @@ import numpy as np
 # Nome da função que será chamada pelo worker
 # Broker envia e recebe mensagens relacionadas a tarefas distribuídas (RabbitMQ)
 # Backend armazena os resultados calculados quando houver algum delay na rede (Redis)
-app = celery.Celery('cropimage', broker='amqp://127.0.0.1:6379', backend='redis://127.0.0.1:6379')
+
+app = celery.Celery('cropimage', broker='amqp://172.21.45.18:5672', backend='redis://172.21.45.18')
 
 # Recebe a imagem e retorna os dados da imagem (H, S, V, L, A, B, Grey)
 @app.task
-def read_crop_analyze(row):
+def read_crop_analyze(coffee, paper, agtron,flash, x, y, h):
+
+    coffee_img = bytes_to_image(coffee)
+    paper_img = bytes_to_image(paper)
+
     row_data = []
 
     # Carregando a imagem e aplica a função de corte, que irá cortar a imagem nos pontos informados
-    img_coffee = crop_image(cv2.imread(
-        './RAW/{}'.format(row['name_coffee'])), row['X1'], row['Y1'], row['H'])
-    img_paper = crop_image(cv2.imread(
-        './RAW/{}'.format(row['name_paper'])), row['X1'], row['Y1'], row['H'])
+    img_coffee = crop_image(coffee_img, x, y, h)
+    img_paper = crop_image(paper_img, x, y, h)
 
-    agtron_value = row['agtron']
-    flash_value = row['flash']
+    agtron_value = agtron
+    flash_value = flash
 
-    print('device: {}, flash: {}, agtron: {}'.format(
-        row['device_id'], flash_value, agtron_value))
+    print('flash: {}, agtron: {}'.format(flash_value, agtron_value))
 
     # Cria um dicionário com os dados da imagem de café (Componentes referentes a cor)
     row_data.extend(mean_std(extract_hsv(img_coffee)))
@@ -47,6 +52,14 @@ def read_crop_analyze(row):
 
     # Retorna o dicionário com os dados da imagem
     return row_data
+
+# Converte os bytes para uma imagem em cv2
+def bytes_to_image(bytes):
+    byte = bytes.encode('utf-8')
+    decoded = base64.b64decode(byte)
+    pil = Image.open(io.BytesIO(decoded))
+    img = cv2.cvtColor(np.array(pil), cv2.COLOR_RGB2BGR)
+    return img
 
 # Corta a imagem nos pontos informados
 def crop_image(img, x, y, h):

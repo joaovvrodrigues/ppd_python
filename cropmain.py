@@ -1,9 +1,10 @@
 import time
-from celery import group
 import cropimage
 import argparse
 import time
 import pandas as pd
+import base64
+
 
 def main():
     itens = []
@@ -23,56 +24,22 @@ def main():
     if(args.images > df.shape[0]):
         args.images = df.shape[0]
 
-    # Split the sequence (considering 16 processes)
-    # A works start a process per core
-    # parts = 2
-    # sub_size = int(args.images) // parts
-    # subseqs = [df.iloc[i * sub_size:(i + 1) * sub_size] for i in range(parts - 1)]
-    # subseqs.append(df.iloc[(parts - 1) * sub_size:])
-
-    # print(subseqs)
     for i in range(args.images):
-        result = cropimage.read_crop_analyze.delay(df.iloc[i])
-        print(result.get())
-    
-    # partials = group(sort.s(seq) for seq in subseqs)().get()
+        with open('./RAW/{}'.format(df.iloc[i][1]), "rb") as f:
+            bytes_coffee = f.read()        
+        b64_coffee = base64.b64encode(bytes_coffee).decode("utf8")
+        
+        with open('./RAW/{}'.format(df.iloc[i][2]), "rb") as f:
+            bytes_paper = f.read()        
+        b64_paper = base64.b64encode(bytes_paper).decode("utf8")
 
-    # Merge all the individual sorted sub-lists into our final result.
-    # result = partials[0]
-    # for partial in partials[1:]:
-    #     result = merge(result, partial)
-    # # Processando as imagens
-    # for i in range(args.images):
-    #     itens.append(coffee_analyzer.read_crop_analyze(df.iloc[i]))
+        result = cropimage.read_crop_analyze.delay(b64_coffee, b64_paper, int(df.iloc[i][3]), int(df.iloc[i][4]),  int(df.iloc[i][5]),  int(df.iloc[i][6]), int(df.iloc[i][9]),  )
+        print(result.get())
 
     END_TIME = time.time()
 
     print('Time for sequential:', END_TIME - START_TIME, 'secs')
-    print('Total itens:', len(itens))
-
+    print('Total itens:', len(itens))    
 
 if __name__ == '__main__':
     main()
-
-# # Create a list of 1,000,000 elements in random order.
-# sequence = list(range(1000000))
-# random.shuffle(sequence)
-# start_time = time.time()
-
-# # Split the sequence (considering 16 processes)
-# # A works start a process per core
-# parts = 16
-# sub_size = len(sequence) // parts
-# subseqs = [sequence[i * sub_size:(i + 1) * sub_size] for i in range(parts - 1)]
-# subseqs.append(sequence[(parts - 1) * sub_size:])
-
-# # Ask the Celery workers to sort each sub-sequence.
-# # Use a group to run the individual independent tasks as a unit of work.
-# partials = group(sort.s(seq) for seq in subseqs)().get()
-
-# # Merge all the individual sorted sub-lists into our final result.
-# result = partials[0]
-# for partial in partials[1:]:
-#     result = merge(result, partial)
-# distrib_time = time.time() - start_time
-# print('Distributed mergesort took %.02fs' % (distrib_time))
