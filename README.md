@@ -1,4 +1,5 @@
 # PPD - Trabalho 1
+
 O objetivo deste trabalho é demonstrar como a programação paralela pode ser usada para reduzir o tempo de processamento de diversos tipos de programas, bem como apresentar os resultados obtidos através de sua aplicação em um algoritmo de extração de características e cores de imagens.
 
 ## Implementações
@@ -42,5 +43,33 @@ Bibliotecas necessárias para a execução do programa.
 | Queue |
 | Pandas | 
 | Numpy |
-| Cv2 | 
+| Cv2 |
+| Celery |
+| Redis |
+
+# PPD - Trabalho 2
+
+O objetivo deste trabalho é demonstrar como a programação distribuída pode ser usada para reduzir o tempo de processamento de diversos tipos de programas, bem como apresentar os resultados obtidos através de sua aplicação em um algoritmo de extração de características e cores de imagens.
+
+## Como executar
+
+É necessário instalar 3 softwares nas máquinas disponíveis para executar este programa:
+
+- Celery
+- Redis
+- RabbitMQ
+
+Na máquina que servirá como worker, é necessário instalar o Celery. Na máquina que servirá como broker, é necessário instalar o RabbitMQ e o Redis. Também é necessário instalar
+as bibliotecas do python para o celery e o redis. As bibliotecas devem ser instaladas em todas as máquinas, através dos comandos:
+
+```pip install celery```
+```pip install redis```
+
+Para executar o programa, primeiro é necessário inicializar o RabbitMQ e o Redis na máquina que servirá como broker. Também é necessário inicializar o Celery na(s) máquina(s) que servirá(ão) como worker(s) através do comando:
+
+```celery -A cropimage worker --loglevel=info```
+
+Após a inicialização do RabbitMQ e do Redis no broker, o programa pode ser executado através do comando:
+
+```python cropmain.py```
 
